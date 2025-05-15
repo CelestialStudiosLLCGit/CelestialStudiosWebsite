@@ -54,7 +54,6 @@
       cursor: pointer;
       transition: opacity .3s;
     }
-
     button:hover { opacity: 0.85; }
 
     .error {
@@ -65,20 +64,18 @@
 
     #secure-content {
       display: none;
-      padding: 30px;
       width: 100%;
-      max-width: 1000px;
+      max-width: 900px;
+      margin: 20px auto;
       background: #000;
       border-radius: 10px;
-      margin: auto;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
-
-    iframe, .injected {
+    /* ensure the injected portal fills this container */
+    #secure-content .injected-root {
       width: 100%;
-      height: 80vh;
-      border: none;
-      background: #000;
-      color: #fff;
+      height: 100%;
     }
   </style>
 </head>
@@ -102,16 +99,18 @@
   <div id="secure-content"></div>
 
   <script>
+    // your “database”
     const USERS = [
       { user: "EvanF", pass: "CTOAccess9078" },
     ];
 
-    const redirectURL = "https://raw.githubusercontent.com/CelestialStudiosLLCGit/CelestialStudiosWebsite/refs/heads/main/portal.html";
+    // raw GitHub URL for your portal.html
+    const redirectURL = "https://raw.githubusercontent.com/CelestialStudiosLLCGit/CelestialStudiosWebsite/main/portal.html";
 
-    const form = document.getElementById("login-form");
-    const errMsg = document.getElementById("error-msg");
-    const loginCard = document.getElementById("login-card");
-    const secureContent = document.getElementById("secure-content");
+    const form         = document.getElementById("login-form");
+    const errMsg       = document.getElementById("error-msg");
+    const loginCard    = document.getElementById("login-card");
+    const secureHolder = document.getElementById("secure-content");
 
     form.addEventListener("submit", async e => {
       e.preventDefault();
@@ -124,17 +123,24 @@
         return;
       }
 
-      // Hide login UI
-      loginCard.style.display = "none";
-      secureContent.style.display = "block";
+      // switch views
+      loginCard.style.display    = "none";
+      secureHolder.style.display = "block";
 
-      // Load external content
       try {
-        const res = await fetch(redirectURL);
+        // fetch and inject
+        const res  = await fetch(redirectURL);
         const html = await res.text();
-        secureContent.innerHTML = html;
+
+        // wrap it so styles/scripts don’t leak
+        const container = document.createElement("div");
+        container.className = "injected-root";
+        container.innerHTML = html;
+
+        secureHolder.appendChild(container);
       } catch (err) {
-        secureContent.innerHTML = "<p style='color: red;'>Failed to load secured content.</p>";
+        secureHolder.innerHTML =
+          "<p style='color: red; padding: 20px;'>Failed to load staff portal.</p>";
       }
     });
   </script>
