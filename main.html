@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Secure Login Redirect</title>
+  <title>Secure Staff Login</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* RESET & BODY */
+    * { box-sizing: border-box; margin: 0; padding: 0 }
     body {
       background: #111;
       color: #eee;
@@ -17,6 +18,7 @@
       padding: 20px;
     }
 
+    /* LOGIN CARD */
     .card {
       background: rgba(0,0,0,0.85);
       border-radius: 8px;
@@ -25,25 +27,21 @@
       max-width: 360px;
       text-align: center;
     }
-
     .logo {
       height: 80px;
       margin-bottom: 20px;
     }
-
     form {
       display: flex;
       flex-direction: column;
       gap: 15px;
     }
-
     input {
       padding: 10px;
       border: none;
       border-radius: 4px;
       font-size: 1rem;
     }
-
     button {
       padding: 12px;
       border: none;
@@ -54,14 +52,14 @@
       cursor: pointer;
       transition: opacity .3s;
     }
-    button:hover { opacity: 0.85; }
-
+    button:hover { opacity: 0.85 }
     .error {
       color: #f66;
       font-size: .9rem;
       height: 1.2em;
     }
 
+    /* SECURE CONTENT HOLDER */
     #secure-content {
       display: none;
       width: 100%;
@@ -72,21 +70,13 @@
       overflow: hidden;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
-    /* ensure the injected portal fills this container */
-    #secure-content .injected-root {
-      width: 100%;
-      height: 100%;
-    }
   </style>
 </head>
 
 <body>
+  <!-- LOGIN UI -->
   <div class="card" id="login-card">
-    <img
-      src="https://i.postimg.cc/Xpy15wkY/logo.png"
-      alt="Cs Logo"
-      class="logo"
-    />
+    <img src="https://i.postimg.cc/Xpy15wkY/logo.png" alt="Cs Logo" class="logo" />
     <h2>Staff Login</h2>
     <form id="login-form">
       <input type="text" id="username" placeholder="Username" required />
@@ -96,15 +86,14 @@
     </form>
   </div>
 
+  <!-- CONTAINER FOR INJECTED PORTAL -->
   <div id="secure-content"></div>
 
   <script>
-    // your “database”
-    const USERS = [
-      { user: "EvanF", pass: "CTOAccess9078" },
-    ];
+    // *** Demo credentials ***
+    const USERS = [{ user: "EvanF", pass: "CTOAccess9078" }];
 
-    // raw GitHub URL for your portal.html
+    // Raw GitHub HTML URL for your portal page
     const redirectURL = "https://raw.githubusercontent.com/CelestialStudiosLLCGit/CelestialStudiosWebsite/main/portal.html";
 
     const form         = document.getElementById("login-form");
@@ -123,24 +112,28 @@
         return;
       }
 
-      // switch views
-      loginCard.style.display    = "none";
+      // Hide login, show secure container
+      loginCard.style.display = "none";
       secureHolder.style.display = "block";
 
       try {
-        // fetch and inject
+        // Fetch the portal HTML
         const res  = await fetch(redirectURL);
-        const html = await res.text();
+        const text = await res.text();
 
-        // wrap it so styles/scripts don’t leak
-        const container = document.createElement("div");
-        container.className = "injected-root";
-        container.innerHTML = html;
+        // Parse it
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, "text/html");
 
-        secureHolder.appendChild(container);
+        // 1) Inject any <style> tags into THIS page's <head>
+        doc.querySelectorAll("style").forEach(style => {
+          document.head.appendChild(style.cloneNode(true));
+        });
+
+        // 2) Inject body content into secureHolder
+        secureHolder.innerHTML = doc.body.innerHTML;
       } catch (err) {
-        secureHolder.innerHTML =
-          "<p style='color: red; padding: 20px;'>Failed to load staff portal.</p>";
+        secureHolder.innerHTML = "<p style='color:red; padding:20px;'>Failed to load portal.</p>";
       }
     });
   </script>
