@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login &amp; Accounts Table</title>
+  <style>
+    /* RESET & BODY */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* CONTAINER */
+    .card {
+      background: rgba(0,0,0,0.8);
+      border-radius: 8px;
+      padding: 30px 20px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    .logo {
+      height: 80px;
+      margin-bottom: 20px;
+    }
+
+    /* FORM */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    input {
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(90deg,#a044ff,#6a00ff);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity .3s;
+    }
+    button:hover { opacity: 0.85; }
+
+    .error {
+      color: #f66;
+      font-size: .9rem;
+      height: 1.2em;
+    }
+
+    /* TABLE */
+    .accounts {
+      display: none;
+      margin-top: 10px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 8px 6px;
+      text-align: left;
+      font-size: .95rem;
+    }
+    thead th {
+      background: #222;
+      color: #fff;
+    }
+    tbody tr:nth-child(odd) {
+      background: #1a1a1a;
+    }
+    tbody tr:nth-child(even) {
+      background: #0f0f0f;
+    }
+
+    /* HEADINGS */
+    h2 {
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <!-- Logo -->
+    <img
+      src="https://i.postimg.cc/Xpy15wkY/logo.png"
+      alt="Cs Logo"
+      class="logo"
+    />
+
+    <!-- LOGIN FORM -->
+    <div id="login-section">
+      <h2>Member Login</h2>
+      <form id="login-form">
+        <input
+          type="text"
+          id="username"
+          placeholder="Username"
+          required
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          required
+        />
+        <button type="submit">Log In</button>
+        <div class="error" id="error-msg"></div>
+      </form>
+    </div>
+
+    <!-- ACCOUNTS TABLE -->
+    <div id="accounts-section" class="accounts">
+      <h2>Accounts &amp; Passwords</h2>
+      <table>
+        <thead>
+          <tr><th>Username</th><th>Password</th></tr>
+        </thead>
+        <tbody id="accounts-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // --- hard-coded “database” (demo only!) ---
+    const USERS = [
+      { user: "EvanF",    pass: "CTOAccess9078" },
+    ];
+
+    const form      = document.getElementById("login-form");
+    const errMsg    = document.getElementById("error-msg");
+    const loginSec  = document.getElementById("login-section");
+    const acctSec   = document.getElementById("accounts-section");
+    const acctBody  = document.getElementById("accounts-body");
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const u = document.getElementById("username").value.trim();
+      const p = document.getElementById("password").value.trim();
+      const found = USERS.find(o => o.user === u && o.pass === p);
+
+      if (!found) {
+        errMsg.textContent = "Invalid username or password";
+        return;
+      }
+
+      // clear error, hide login, show table
+      errMsg.textContent = "";
+      loginSec.style.display   = "none";
+      acctSec.style.display    = "block";
+
+      // populate table
+      USERS.forEach(o => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${o.user}</td><td>${o.pass}</td>`;
+        acctBody.appendChild(tr);
+      });
+    });
+  </script>
+</body>
+</html>
