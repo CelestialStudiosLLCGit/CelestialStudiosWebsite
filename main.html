@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Secure Staff Login 2.1</title>
+  <title>Secure Staff Portal</title>
   <style>
-    /* RESET & BODY */
+    /* RESET */
     * { box-sizing: border-box; margin: 0; padding: 0 }
+
     body {
       background: #111;
       color: #eee;
@@ -27,22 +28,26 @@
       max-width: 360px;
       text-align: center;
     }
-    .logo {
+    .card .logo {
       height: 80px;
       margin-bottom: 20px;
     }
-    form {
+    .card h2 {
+      margin-bottom: 15px;
+      color: #a366ff;
+    }
+    .card form {
       display: flex;
       flex-direction: column;
       gap: 15px;
     }
-    input {
+    .card input {
       padding: 10px;
       border: none;
       border-radius: 4px;
       font-size: 1rem;
     }
-    button {
+    .card button {
       padding: 12px;
       border: none;
       border-radius: 999px;
@@ -52,23 +57,74 @@
       cursor: pointer;
       transition: opacity .3s;
     }
-    button:hover { opacity: 0.85 }
-    .error {
+    .card button:hover { opacity: 0.85; }
+    .card .error {
       color: #f66;
       font-size: .9rem;
       height: 1.2em;
     }
 
-    /* SECURE CONTENT HOLDER */
+    /* PORTAL CONTAINER */
     #secure-content {
       display: none;
       width: 100%;
       max-width: 900px;
-      margin: 20px auto;
+      margin: 0 auto;
       background: #000;
       border-radius: 10px;
-      overflow: hidden;
+      overflow: auto;
+      padding: 40px 20px;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* PORTAL STYLES */
+    #secure-content .logo {
+      height: 80px;
+      margin-bottom: 20px;
+    }
+    #secure-content h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+      color: #a366ff;
+      text-align: center;
+    }
+    #secure-content p {
+      font-size: 1.1em;
+      max-width: 800px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    #secure-content .section {
+      width: 100%;
+      max-width: 900px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+    #secure-content .section h2 {
+      color: #b366ff;
+      margin-bottom: 10px;
+    }
+    #secure-content ul {
+      list-style: disc;
+      padding-left: 20px;
+    }
+    #secure-content a {
+      color: #9c33ff;
+      text-decoration: none;
+    }
+    #secure-content a:hover {
+      text-decoration: underline;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      #secure-content h1 { font-size: 1.5em; }
+      #secure-content p { font-size: 1em; }
     }
   </style>
 </head>
@@ -77,7 +133,7 @@
   <!-- LOGIN UI -->
   <div class="card" id="login-card">
     <img src="https://i.postimg.cc/Xpy15wkY/logo.png" alt="Cs Logo" class="logo" />
-    <h2>Staff Login 2.1</h2>
+    <h2>Staff Login</h2>
     <form id="login-form">
       <input type="text" id="username" placeholder="Username" required />
       <input type="password" id="password" placeholder="Password" required />
@@ -86,55 +142,63 @@
     </form>
   </div>
 
-  <!-- CONTAINER FOR INJECTED PORTAL -->
-  <div id="secure-content"></div>
+  <!-- STAFF PORTAL -->
+  <div id="secure-content">
+    <img src="https://i.postimg.cc/Xpy15wkY/logo.png" alt="Cs Logo" class="logo" />
+    <h1>Welcome to the Celestial Staff Portal</h1>
+    <p>
+      You are logged in with staff-level access. Below are your resources, tools, and current updates for internal operations.
+    </p>
+
+    <div class="section">
+      <h2>📢 Announcements</h2>
+      <ul>
+        <li>Server maintenance scheduled for <strong>Friday 10PM CST</strong>.</li>
+        <li>Q2 Staff Meeting will be held via Discord on <strong>June 8</strong>.</li>
+        <li>Submit weekly reports by <strong>Sunday night</strong>.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>⬇️ Downloads</h2>
+      <ul>
+        <li><a href="#">Staff Handbook (PDF)</a></li>
+        <li><a href="#">Brand Guidelines</a></li>
+        <li><a href="#">Moderator Command Sheet</a></li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>🛠 Tools & Resources</h2>
+      <ul>
+        <li><a href="#">Internal Issue Tracker</a></li>
+        <li><a href="#">Performance Analytics</a></li>
+        <li><a href="#">Server Panel Access</a></li>
+      </ul>
+    </div>
+  </div>
 
   <script>
-    // *** Demo credentials ***
+    // Demo credentials
     const USERS = [{ user: "EvanF", pass: "CTOAccess9078" }];
+    const form       = document.getElementById("login-form");
+    const errMsg     = document.getElementById("error-msg");
+    const loginCard  = document.getElementById("login-card");
+    const securePane = document.getElementById("secure-content");
 
-    // Raw GitHub HTML URL for your portal page
-    const redirectURL = "https://raw.githubusercontent.com/CelestialStudiosLLCGit/CelestialStudiosWebsite/main/portal.html";
-
-    const form         = document.getElementById("login-form");
-    const errMsg       = document.getElementById("error-msg");
-    const loginCard    = document.getElementById("login-card");
-    const secureHolder = document.getElementById("secure-content");
-
-    form.addEventListener("submit", async e => {
+    form.addEventListener("submit", e => {
       e.preventDefault();
       const u = document.getElementById("username").value.trim();
       const p = document.getElementById("password").value.trim();
-      const found = USERS.find(o => o.user === u && o.pass === p);
+      const valid = USERS.some(o => o.user === u && o.pass === p);
 
-      if (!found) {
+      if (!valid) {
         errMsg.textContent = "Invalid username or password";
         return;
       }
-
-      // Hide login, show secure container
-      loginCard.style.display = "none";
-      secureHolder.style.display = "block";
-
-      try {
-        // Fetch the portal HTML
-        const res  = await fetch(redirectURL);
-        const text = await res.text();
-
-        // Parse it
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, "text/html");
-
-        // 1) Inject any <style> tags into THIS page's <head>
-        doc.querySelectorAll("style").forEach(style => {
-          document.head.appendChild(style.cloneNode(true));
-        });
-
-        // 2) Inject body content into secureHolder
-        secureHolder.innerHTML = doc.body.innerHTML;
-      } catch (err) {
-        secureHolder.innerHTML = "<p style='color:red; padding:20px;'>Failed to load portal.</p>";
-      }
+      // swap views
+      loginCard.style.display  = "none";
+      securePane.style.display = "flex"; // now that CSS doesn't override it stays hidden until here
     });
   </script>
 </body>
